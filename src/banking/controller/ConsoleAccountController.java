@@ -3,6 +3,7 @@ package banking.controller;
 import banking.domain.Account;
 import banking.service.AccountService;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class ConsoleAccountController implements AccountController {
@@ -100,7 +101,7 @@ public class ConsoleAccountController implements AccountController {
             service.transfer(loggedInCardNumber, receiverCardNumber, amount);
             System.out.println("Success!");
             return true;
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException | SQLException e) {
             System.out.println(e.getMessage());
             return false;
         }

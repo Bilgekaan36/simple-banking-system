@@ -5,6 +5,10 @@ import banking.repository.AccountRepository;
 import banking.util.CardGenerator;
 import banking.util.CardValidator;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -66,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void transfer(String senderCardNumber, String receiverCardNumber, double transferAmount) {
+    public void transfer(String senderCardNumber, String receiverCardNumber, double transferAmount) throws SQLException {
         if (!CardValidator.isValidLuhn(receiverCardNumber)) {
             throw new IllegalArgumentException("Card number validation failed");
         }
@@ -81,16 +85,49 @@ public class AccountServiceImpl implements AccountService {
         Account receiver = repository.findByCardNumber(receiverCardNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Receiver account not found"));
 
+        Connection connection = null;
         try {
+            // Verbindung öffnen und Transaktion starten
+            connection = DriverManager.getConnection("jdbc:sqlite:banking.db");
+            connection.setAutoCommit(false);
+
             sender.withdraw(transferAmount);
             receiver.deposit(transferAmount);
+
+            // Transaktion bestätigen
+            connection.commit();
+
             repository.save(sender);
             repository.save(receiver);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException(e.getMessage());
+
+        } catch (Exception e) {
+            // Fehler: Rollback
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    // Rollback-Fehler ignorieren
+                }
+            }
+            // Original-Exception weiterleiten
+            if (e instanceof IllegalArgumentException) {
+                throw (IllegalArgumentException) e;
+            } else if (e instanceof IllegalStateException) {
+                throw (IllegalStateException) e;
+            } else {
+                throw new RuntimeException("Transfer failed: " + e.getMessage(), e);
+            }
+        } finally {
+            // Verbindung schließen
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    // Schließen-Fehler ignorieren
+                }
+            }
         }
+
     }
 
     @Override

@@ -2,6 +2,7 @@ package banking.service;
 
 import banking.domain.Account;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +54,7 @@ public interface AccountService {
      * @throws IllegalArgumentException wenn eine der Kartennummern ungültig ist oder die Konten nicht existieren
      * @throws IllegalStateException wenn nicht genügend Geld vorhanden ist
      */
-    void transfer(String senderCardNumber, String receiverCardNumber, double amount);
+    void transfer(String senderCardNumber, String receiverCardNumber, double amount) throws SQLException;
     
     /**
      * Fügt Geld zu einem Konto hinzu.

@@ -1,6 +1,7 @@
 package banking;
 
 
+import banking.controller.AccountController;
 import banking.controller.ConsoleAccountController;
 import banking.repository.AccountRepository;
 import banking.repository.SqliteAccountRepository;
@@ -11,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         AccountRepository repository = new SqliteAccountRepository(args[0]);
         AccountService service = new AccountServiceImpl(repository);
-        ConsoleAccountController controller = new ConsoleAccountController(service);
+        AccountController controller = new ConsoleAccountController(service);
 
         controller.run();
     }
