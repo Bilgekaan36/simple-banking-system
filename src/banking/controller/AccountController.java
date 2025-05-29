@@ -1,88 +1,85 @@
 package banking.controller;
 
-import banking.domain.Account;
-import banking.service.Accountservice;
+/**
+ * Interface für Banking-Controller.
+ * Definiert die grundlegenden Interaktionen des Controllers mit dem Benutzer.
+ */
+public interface AccountController {
 
-import java.util.Optional;
-import java.util.Scanner;
+    /**
+     * Startet die Controller-Ausführung und steuert die Benutzerinteraktionen.
+     * Diese Methode enthält typischerweise die Hauptschleife des Programms.
+     */
+    void run();
 
-public class AccountController {
-    Accountservice service;
+    /**
+     * Beendet die Controller-Ausführung sauber und gibt Ressourcen frei.
+     */
+    void shutdown();
 
-    public AccountController(Accountservice service) {
-        this.service = service;
-    }
+    /**
+     * Verarbeitet den Anmeldevorgang eines Benutzers.
+     *
+     * @param cardNumber Die Kartennummer des Benutzers
+     * @param pin        Die PIN des Benutzers
+     * @return true wenn der Login erfolgreich war, sonst false
+     */
+    boolean login(String cardNumber, String pin);
 
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
+    /**
+     * Meldet den aktuellen Benutzer ab.
+     */
+    void logout();
 
-        Optional<Account> loggedInUser = Optional.empty();
-        while (true) {
-            if (loggedInUser.isEmpty()) {
-                System.out.println("1. Create an account");
-                System.out.println("2. Log into account");
-                System.out.println("0. Exit");
+    /**
+     * Initiiert den Kontoerstellungsprozess im Controller.
+     *
+     * @return Array mit [cardNumber, pin] oder null im Fehlerfall
+     */
+    String[] createNewAccount();
 
-                int input = scanner.nextInt();
-                switch (input) {
-                    case 0:
-                        System.out.println("Bye!");
-                        System.exit(0);
-                        scanner.close();
-                        break;
-                    case 1:
-                        Account account = service.createAccount();
-                        System.out.println("Your card has been created");
-                        System.out.println("Your card number:");
-                        System.out.println(account.getCardNumber());
-                        System.out.println("Your card PIN:");
-                        System.out.println(account.getPin());
-                        break;
-                    case 2:
-                        // code block
-                        System.out.println("Enter your card number: ");
-                        String loginCardNumber = scanner.next();
+    /**
+     * Zeigt den Kontostand für den aktuell angemeldeten Benutzer an.
+     *
+     * @return true wenn die Anzeige erfolgreich war, sonst false
+     */
+    boolean showBalance();
 
-                        System.out.println("Enter your PIN: ");
-                        String loginPin = scanner.next();
+    /**
+     * Initiiert den Prozess zum Hinzufügen von Guthaben.
+     *
+     * @param amount Der hinzuzufügende Betrag
+     * @return true wenn die Einzahlung erfolgreich war, sonst false
+     */
+    boolean addIncome(double amount);
 
+    /**
+     * Initiiert den Überweisungsprozess.
+     *
+     * @param receiverCardNumber Die Kartennummer des Empfängers
+     * @param amount             Der zu überweisende Betrag
+     * @return true wenn die Überweisung erfolgreich war, sonst false
+     */
+    boolean doTransfer(String receiverCardNumber, double amount);
 
-                        try {
-                            loggedInUser = Optional.of(service.login(loginCardNumber, loginPin));
-                            System.out.println("You have successfully logged in!");
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(e.getMessage());
-                        }
-                        break;
-                }
-            } else {
-                System.out.println("1. Balance");
-                System.out.println("2. Log out");
-                System.out.println("0. Exit");
+    /**
+     * Initiiert den Prozess zum Schließen des aktuellen Kontos.
+     *
+     * @return true wenn das Konto erfolgreich geschlossen wurde, sonst false
+     */
+    boolean closeAccount();
 
-                int input = scanner.nextInt();
-                switch (input) {
-                    case 0:
-                        System.out.println("Bye!");
-                        System.exit(0);
-                        scanner.close();
-                        break;
-                    case 1:
-                        try {
-                            double balance = service.getBalance(loggedInUser.get());
-                            System.out.println("Balance: " + balance);
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(e.getMessage());
-                    }
-                        break;
-                    case 2:
+    /**
+     * Prüft, ob ein Benutzer derzeit angemeldet ist.
+     *
+     * @return true wenn ein Benutzer angemeldet ist, sonst false
+     */
+    boolean isLoggedIn();
 
-                        loggedInUser = Optional.empty();
-                        System.out.println("You have successfully logged out!");
-                        break;
-                }
-            }
-        }
-    }
-
+    /**
+     * Gibt die Kartennummer des aktuell angemeldeten Benutzers zurück.
+     *
+     * @return Die Kartennummer oder null, wenn kein Benutzer angemeldet ist
+     */
+    String getCurrentCardNumber();
 }
